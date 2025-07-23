@@ -3,6 +3,7 @@ class TimelineAnalyzer {
         this.events = [];
         this.persons = [];
         this.locations = [];
+        this.times = [];
         this.editingEventId = null;
         this.init();
     }
@@ -14,6 +15,8 @@ class TimelineAnalyzer {
         this.updateLocationSelects();
         this.updateTable();
         this.updateLocationFilter();
+        this.initManagementTabs();
+        this.updateManagementLists();
     }
 
     bindEvents() {
@@ -58,6 +61,7 @@ class TimelineAnalyzer {
         });
 
         this.bindAddButtons();
+        this.bindManagementButtons();
     }
 
     bindAddButtons() {
@@ -174,12 +178,29 @@ class TimelineAnalyzer {
                 { id: 6, name: '庭', created_at: new Date().toISOString() }
             ];
         }
+
+        // 時間データを読み込み
+        const savedTimes = localStorage.getItem('timelineTimes');
+        if (savedTimes) {
+            this.times = JSON.parse(savedTimes);
+        } else {
+            // 初期データ
+            this.times = [
+                { id: 1, time: '09:00', created_at: new Date().toISOString() },
+                { id: 2, time: '10:00', created_at: new Date().toISOString() },
+                { id: 3, time: '12:00', created_at: new Date().toISOString() },
+                { id: 4, time: '14:00', created_at: new Date().toISOString() },
+                { id: 5, time: '16:00', created_at: new Date().toISOString() },
+                { id: 6, time: '18:00', created_at: new Date().toISOString() }
+            ];
+        }
     }
 
     saveToStorage() {
         localStorage.setItem('timelineEvents', JSON.stringify(this.events));
         localStorage.setItem('timelinePersons', JSON.stringify(this.persons));
         localStorage.setItem('timelineLocations', JSON.stringify(this.locations));
+        localStorage.setItem('timelineTimes', JSON.stringify(this.times));
     }
 
     updatePersonSelects() {
@@ -471,8 +492,203 @@ class TimelineAnalyzer {
             }
         }
     }
+
+    // 管理機能のメソッド
+    initManagementTabs() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.dataset.tab;
+
+                // アクティブなタブを切り替え
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(`${targetTab}-tab`).classList.add('active');
+            });
+        });
+    }
+
+    bindManagementButtons() {
+        // 人物管理
+        document.getElementById('bulkAddPersons').addEventListener('click', () => {
+            this.bulkAddItems('persons');
+        });
+        document.getElementById('clearPersons').addEventListener('click', () => {
+            this.clearAllItems('persons');
+        });
+
+        // 場所管理
+        document.getElementById('bulkAddLocations').addEventListener('click', () => {
+            this.bulkAddItems('locations');
+        });
+        document.getElementById('clearLocations').addEventListener('click', () => {
+            this.clearAllItems('locations');
+        });
+
+        // 時間管理
+        document.getElementById('bulkAddTimes').addEventListener('click', () => {
+            this.bulkAddItems('times');
+        });
+        document.getElementById('clearTimes').addEventListener('click', () => {
+            this.clearAllItems('times');
+        });
+    }
+
+    bulkAddItems(type) {
+        const textareaId = `bulk${type.charAt(0).toUpperCase() + type.slice(0, -1)}s`;
+        const textarea = document.getElementById(textareaId);
+        const inputText = textarea.value.trim();
+
+        if (!inputText) {
+            alert('追加するデータを入力してください');
+            return;
+        }
+
+        const lines = inputText.split('\n').map(line => line.trim()).filter(line => line);
+        const collection = this[type];
+        let addedCount = 0;
+        let duplicateCount = 0;
+
+        lines.forEach(line => {
+            if (type === 'times') {
+                // 時間の形式チェック
+                if (!/^\d{2}:\d{2}$/.test(line)) {
+                    alert(`無効な時間形式です: ${line}\nHH:MM形式で入力してください`);
+                    return;
+                }
+                if (collection.some(item => item.time === line)) {
+                    duplicateCount++;
+                    return;
+                }
+                collection.push({
+                    id: Date.now() + Math.random(),
+                    time: line,
+                    created_at: new Date().toISOString()
+                });
+            } else {
+                // 人物・場所の重複チェック
+                if (collection.some(item => item.name === line)) {
+                    duplicateCount++;
+                    return;
+                }
+                collection.push({
+                    id: Date.now() + Math.random(),
+                    name: line,
+                    created_at: new Date().toISOString()
+                });
+            }
+            addedCount++;
+        });
+
+        if (addedCount > 0) {
+            this.saveToStorage();
+            if (type === 'persons') {
+                this.updatePersonSelects();
+            } else if (type === 'locations') {
+                this.updateLocationSelects();
+            }
+            this.updateManagementLists();
+            textarea.value = '';
+        }
+
+        let message = `${addedCount}件のデータを追加しました`;
+        if (duplicateCount > 0) {
+            message += `\n（${duplicateCount}件は重複のためスキップされました）`;
+        }
+        alert(message);
+    }
+
+    clearAllItems(type) {
+        const typeNames = {
+            persons: '人物',
+            locations: '場所',
+            times: '時間'
+        };
+
+        if (!confirm(`すべての${typeNames[type]}データを削除しますか？`)) {
+            return;
+        }
+
+        this[type] = [];
+        this.saveToStorage();
+
+        if (type === 'persons') {
+            this.updatePersonSelects();
+        } else if (type === 'locations') {
+            this.updateLocationSelects();
+        }
+
+        this.updateManagementLists();
+        alert(`すべての${typeNames[type]}データを削除しました`);
+    }
+
+    removeItem(type, id) {
+        const collection = this[type];
+        const index = collection.findIndex(item => item.id === id);
+        
+        if (index !== -1) {
+            collection.splice(index, 1);
+            this.saveToStorage();
+
+            if (type === 'persons') {
+                this.updatePersonSelects();
+            } else if (type === 'locations') {
+                this.updateLocationSelects();
+            }
+
+            this.updateManagementLists();
+        }
+    }
+
+    updateManagementLists() {
+        this.updatePersonsList();
+        this.updateLocationsList();
+        this.updateTimesList();
+    }
+
+    updatePersonsList() {
+        const container = document.getElementById('personsList');
+        this.renderItemList(container, this.persons, 'persons', 'name');
+    }
+
+    updateLocationsList() {
+        const container = document.getElementById('locationsList');
+        this.renderItemList(container, this.locations, 'locations', 'name');
+    }
+
+    updateTimesList() {
+        const container = document.getElementById('timesList');
+        this.renderItemList(container, this.times, 'times', 'time');
+    }
+
+    renderItemList(container, items, type, displayProperty) {
+        if (items.length === 0) {
+            container.innerHTML = '<div class="empty-list">データがありません</div>';
+            return;
+        }
+
+        const sortedItems = items.slice().sort((a, b) => {
+            const valueA = a[displayProperty];
+            const valueB = b[displayProperty];
+            return valueA.localeCompare(valueB);
+        });
+
+        container.innerHTML = sortedItems.map(item => `
+            <span class="item-tag">
+                ${item[displayProperty]}
+                <button class="remove-btn" onclick="timelineAnalyzer.removeItem('${type}', ${item.id})">&times;</button>
+            </span>
+        `).join('');
+    }
 }
 
+// グローバル変数として参照できるようにする
+let timelineAnalyzer;
+
 document.addEventListener('DOMContentLoaded', () => {
-    new TimelineAnalyzer();
+    timelineAnalyzer = new TimelineAnalyzer();
 });
