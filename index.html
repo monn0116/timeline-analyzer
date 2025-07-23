@@ -12,7 +12,15 @@
             <h1>時系列推理整理アプリ</h1>
         </header>
 
+        <nav class="main-nav">
+            <div class="main-tabs">
+                <button class="main-tab-btn active" data-main-tab="timeline">時系列入力</button>
+                <button class="main-tab-btn" data-main-tab="management">データ管理</button>
+            </div>
+        </nav>
+
         <main>
+            <div class="main-tab-content active" id="timeline-content">
             <section class="input-section">
                 <h2>情報入力</h2>
                 <form id="eventForm">
@@ -62,64 +70,6 @@
                 </div>
             </section>
 
-            <section class="management-section">
-                <h2>データ管理</h2>
-                
-                <div class="management-tabs">
-                    <button class="tab-btn active" data-tab="persons">人物管理</button>
-                    <button class="tab-btn" data-tab="locations">場所管理</button>
-                    <button class="tab-btn" data-tab="times">時間管理</button>
-                </div>
-
-                <div class="tab-content active" id="persons-tab">
-                    <div class="management-controls">
-                        <div class="bulk-input">
-                            <textarea id="bulkPersons" placeholder="複数の人物名を改行で区切って入力&#10;例：&#10;田中太郎&#10;佐藤花子&#10;山田次郎" rows="5"></textarea>
-                            <div class="bulk-buttons">
-                                <button type="button" id="bulkAddPersons" class="bulk-btn add">一括追加</button>
-                                <button type="button" id="clearPersons" class="bulk-btn delete">全削除</button>
-                            </div>
-                        </div>
-                        <div class="current-list">
-                            <h4>現在の人物一覧</h4>
-                            <div id="personsList" class="item-list"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="locations-tab">
-                    <div class="management-controls">
-                        <div class="bulk-input">
-                            <textarea id="bulkLocations" placeholder="複数の場所名を改行で区切って入力&#10;例：&#10;リビング&#10;書斎&#10;台所&#10;玄関" rows="5"></textarea>
-                            <div class="bulk-buttons">
-                                <button type="button" id="bulkAddLocations" class="bulk-btn add">一括追加</button>
-                                <button type="button" id="clearLocations" class="bulk-btn delete">全削除</button>
-                            </div>
-                        </div>
-                        <div class="current-list">
-                            <h4>現在の場所一覧</h4>
-                            <div id="locationsList" class="item-list"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="tab-content" id="times-tab">
-                    <div class="management-controls">
-                        <div class="bulk-input">
-                            <textarea id="bulkTimes" placeholder="複数の時間を改行で区切って入力（HH:MM形式）&#10;例：&#10;09:00&#10;10:30&#10;12:00&#10;15:30" rows="5"></textarea>
-                            <div class="bulk-buttons">
-                                <button type="button" id="bulkAddTimes" class="bulk-btn add">一括追加</button>
-                                <button type="button" id="clearTimes" class="bulk-btn delete">全削除</button>
-                            </div>
-                        </div>
-                        <div class="current-list">
-                            <h4>よく使う時間一覧</h4>
-                            <div id="timesList" class="item-list"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
             <section class="timeline-section">
                 <h2>時系列表</h2>
                 <div class="table-container">
@@ -134,6 +84,67 @@
                     </table>
                 </div>
             </section>
+            </div>
+
+            <div class="main-tab-content" id="management-content">
+                <section class="management-section">
+                    <h2>データ管理</h2>
+                    
+                    <div class="management-tabs">
+                        <button class="tab-btn active" data-tab="persons">人物管理</button>
+                        <button class="tab-btn" data-tab="locations">場所管理</button>
+                        <button class="tab-btn" data-tab="times">時間管理</button>
+                    </div>
+
+                    <div class="tab-content active" id="persons-tab">
+                        <div class="management-controls">
+                            <div class="bulk-input">
+                                <textarea id="bulkPersons" placeholder="複数の人物名を改行で区切って入力&#10;例：&#10;田中太郎&#10;佐藤花子&#10;山田次郎" rows="5"></textarea>
+                                <div class="bulk-buttons">
+                                    <button type="button" id="bulkAddPersons" class="bulk-btn add">一括追加</button>
+                                    <button type="button" id="clearPersons" class="bulk-btn delete">全削除</button>
+                                </div>
+                            </div>
+                            <div class="current-list">
+                                <h4>現在の人物一覧</h4>
+                                <div id="personsList" class="item-list"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="locations-tab">
+                        <div class="management-controls">
+                            <div class="bulk-input">
+                                <textarea id="bulkLocations" placeholder="複数の場所名を改行で区切って入力&#10;例：&#10;リビング&#10;書斎&#10;台所&#10;玄関" rows="5"></textarea>
+                                <div class="bulk-buttons">
+                                    <button type="button" id="bulkAddLocations" class="bulk-btn add">一括追加</button>
+                                    <button type="button" id="clearLocations" class="bulk-btn delete">全削除</button>
+                                </div>
+                            </div>
+                            <div class="current-list">
+                                <h4>現在の場所一覧</h4>
+                                <div id="locationsList" class="item-list"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-content" id="times-tab">
+                        <div class="management-controls">
+                            <div class="bulk-input">
+                                <textarea id="bulkTimes" placeholder="複数の時間を改行で区切って入力（HH:MM形式）&#10;例：&#10;09:00&#10;10:30&#10;12:00&#10;15:30" rows="5"></textarea>
+                                <div class="bulk-buttons">
+                                    <button type="button" id="bulkAddTimes" class="bulk-btn add">一括追加</button>
+                                    <button type="button" id="clearTimes" class="bulk-btn delete">全削除</button>
+                                </div>
+                            </div>
+                            <div class="current-list">
+                                <h4>よく使う時間一覧</h4>
+                                <div id="timesList" class="item-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
         </main>
     </div>
 

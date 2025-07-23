@@ -15,6 +15,7 @@ class TimelineAnalyzer {
         this.updateLocationSelects();
         this.updateTable();
         this.updateLocationFilter();
+        this.initMainTabs();
         this.initManagementTabs();
         this.updateManagementLists();
     }
@@ -491,6 +492,30 @@ class TimelineAnalyzer {
                 this.closeModal();
             }
         }
+    }
+
+    // メインタブ機能のメソッド
+    initMainTabs() {
+        const mainTabBtns = document.querySelectorAll('.main-tab-btn');
+        const mainTabContents = document.querySelectorAll('.main-tab-content');
+
+        mainTabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const targetTab = btn.dataset.mainTab;
+
+                // アクティブなメインタブを切り替え
+                mainTabBtns.forEach(b => b.classList.remove('active'));
+                mainTabContents.forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(`${targetTab}-content`).classList.add('active');
+
+                // データ管理タブに切り替わった時にリストを更新
+                if (targetTab === 'management') {
+                    this.updateManagementLists();
+                }
+            });
+        });
     }
 
     // 管理機能のメソッド
