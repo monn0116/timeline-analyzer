@@ -232,11 +232,14 @@ class TimelineAnalyzer {
         document.getElementById('editLocation').value = event.location;
         document.getElementById('editAction').value = event.action;
         
-        document.getElementById('editModal').style.display = 'block';
+        const modal = document.getElementById('editModal');
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
     }
 
     closeModal() {
         document.getElementById('editModal').style.display = 'none';
+        document.body.style.overflow = '';
         this.editingEventId = null;
     }
 
