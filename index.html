@@ -67,6 +67,43 @@
         </main>
     </div>
 
+    <!-- 編集用モーダル -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>データ編集</h2>
+                <span class="close">&times;</span>
+            </div>
+            <form id="editForm">
+                <div class="form-group">
+                    <label for="editTime">時間:</label>
+                    <input type="time" id="editTime" name="time" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPerson">人物名:</label>
+                    <input type="text" id="editPerson" name="person" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editLocation">場所:</label>
+                    <input type="text" id="editLocation" name="location" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editAction">行動:</label>
+                    <textarea id="editAction" name="action" rows="3" required></textarea>
+                </div>
+                
+                <div class="modal-buttons">
+                    <button type="submit" class="btn-update">更新</button>
+                    <button type="button" class="btn-delete">削除</button>
+                    <button type="button" class="btn-cancel">キャンセル</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

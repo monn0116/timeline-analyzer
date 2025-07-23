@@ -2,6 +2,7 @@ class TimelineAnalyzer {
     constructor() {
         this.events = [];
         this.locations = new Set();
+        this.editingEventId = null;
         this.init();
     }
 
@@ -15,6 +16,11 @@ class TimelineAnalyzer {
     bindEvents() {
         const form = document.getElementById('eventForm');
         const locationFilter = document.getElementById('locationFilter');
+        const editForm = document.getElementById('editForm');
+        const modal = document.getElementById('editModal');
+        const closeBtn = document.querySelector('.close');
+        const cancelBtn = document.querySelector('.btn-cancel');
+        const deleteBtn = document.querySelector('.btn-delete');
 
         form.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -23,6 +29,29 @@ class TimelineAnalyzer {
 
         locationFilter.addEventListener('change', () => {
             this.updateTable();
+        });
+
+        editForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.updateEvent();
+        });
+
+        closeBtn.addEventListener('click', () => {
+            this.closeModal();
+        });
+
+        cancelBtn.addEventListener('click', () => {
+            this.closeModal();
+        });
+
+        deleteBtn.addEventListener('click', () => {
+            this.deleteEvent();
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                this.closeModal();
+            }
         });
     }
 
@@ -148,8 +177,16 @@ class TimelineAnalyzer {
                         actionDiv.className = 'action-text';
                         actionDiv.textContent = event.action;
                         
+                        const editButton = document.createElement('button');
+                        editButton.className = 'edit-button';
+                        editButton.textContent = '編集';
+                        editButton.addEventListener('click', () => {
+                            this.openEditModal(event);
+                        });
+                        
                         eventDiv.appendChild(personDiv);
                         eventDiv.appendChild(actionDiv);
+                        eventDiv.appendChild(editButton);
                         cell.appendChild(eventDiv);
                     });
                 } else {
@@ -184,6 +221,74 @@ class TimelineAnalyzer {
         
         if (savedLocations) {
             this.locations = new Set(JSON.parse(savedLocations));
+        }
+    }
+
+    openEditModal(event) {
+        this.editingEventId = event.id;
+        
+        document.getElementById('editTime').value = event.time;
+        document.getElementById('editPerson').value = event.person;
+        document.getElementById('editLocation').value = event.location;
+        document.getElementById('editAction').value = event.action;
+        
+        document.getElementById('editModal').style.display = 'block';
+    }
+
+    closeModal() {
+        document.getElementById('editModal').style.display = 'none';
+        this.editingEventId = null;
+    }
+
+    updateEvent() {
+        if (!this.editingEventId) return;
+        
+        const formData = new FormData(document.getElementById('editForm'));
+        const eventIndex = this.events.findIndex(event => event.id === this.editingEventId);
+        
+        if (eventIndex !== -1) {
+            const oldLocation = this.events[eventIndex].location;
+            
+            this.events[eventIndex] = {
+                id: this.editingEventId,
+                time: formData.get('time'),
+                person: formData.get('person'),
+                location: formData.get('location'),
+                action: formData.get('action')
+            };
+            
+            this.locations.add(formData.get('location'));
+            
+            if (!this.events.some(event => event.location === oldLocation)) {
+                this.locations.delete(oldLocation);
+            }
+            
+            this.saveToStorage();
+            this.updateTable();
+            this.updateLocationFilter();
+            this.closeModal();
+        }
+    }
+
+    deleteEvent() {
+        if (!this.editingEventId) return;
+        
+        if (confirm('このデータを削除しますか？')) {
+            const eventIndex = this.events.findIndex(event => event.id === this.editingEventId);
+            
+            if (eventIndex !== -1) {
+                const deletedLocation = this.events[eventIndex].location;
+                this.events.splice(eventIndex, 1);
+                
+                if (!this.events.some(event => event.location === deletedLocation)) {
+                    this.locations.delete(deletedLocation);
+                }
+                
+                this.saveToStorage();
+                this.updateTable();
+                this.updateLocationFilter();
+                this.closeModal();
+            }
         }
     }
 }
