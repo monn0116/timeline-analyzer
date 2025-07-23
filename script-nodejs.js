@@ -4,14 +4,13 @@ class TimelineAnalyzer {
         this.persons = [];
         this.locations = [];
         this.editingEventId = null;
+        this.apiUrl = 'http://localhost:3000/api';
         this.init();
     }
 
     async init() {
         this.bindEvents();
-        this.loadFromStorage();
-        this.updatePersonSelects();
-        this.updateLocationSelects();
+        await this.loadInitialData();
         this.updateTable();
         this.updateLocationFilter();
     }
@@ -105,81 +104,57 @@ class TimelineAnalyzer {
         }
     }
 
-    addNewOption(type, name, isEdit = false) {
-        const collection = type === 'person' ? this.persons : this.locations;
-        
-        // 重複チェック
-        if (collection.some(item => item.name === name)) {
-            alert('既に存在する名前です');
-            return;
+    async addNewOption(type, name, isEdit = false) {
+        try {
+            const response = await fetch(`${this.apiUrl}/${type}s`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ name }),
+            });
+
+            if (response.ok) {
+                const newItem = await response.json();
+                if (type === 'person') {
+                    this.persons.push(newItem);
+                    this.updatePersonSelects();
+                } else {
+                    this.locations.push(newItem);
+                    this.updateLocationSelects();
+                }
+
+                const selectId = isEdit ? `edit${type.charAt(0).toUpperCase() + type.slice(1)}` : type;
+                document.getElementById(selectId).value = name;
+            } else {
+                const error = await response.json();
+                alert(`エラー: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('API呼び出しエラー:', error);
+            alert('サーバーに接続できません');
         }
-        
-        // 新しいアイテムを追加
-        const newItem = { 
-            id: Date.now(), 
-            name: name,
-            created_at: new Date().toISOString()
-        };
-        
-        collection.push(newItem);
-        
-        // 選択リストを更新
-        if (type === 'person') {
+    }
+
+    async loadInitialData() {
+        try {
+            const [personsResponse, locationsResponse, eventsResponse] = await Promise.all([
+                fetch(`${this.apiUrl}/persons`),
+                fetch(`${this.apiUrl}/locations`),
+                fetch(`${this.apiUrl}/events`)
+            ]);
+
+            this.persons = await personsResponse.json();
+            this.locations = await locationsResponse.json();
+            this.events = await eventsResponse.json();
+
             this.updatePersonSelects();
-        } else {
             this.updateLocationSelects();
+        } catch (error) {
+            console.error('初期データの読み込みエラー:', error);
+            alert('サーバーに接続できません。ローカルモードで動作します。');
+            this.loadFromStorage();
         }
-        
-        // 追加した項目を選択
-        const selectId = isEdit ? `edit${type.charAt(0).toUpperCase() + type.slice(1)}` : type;
-        document.getElementById(selectId).value = name;
-        
-        // ストレージに保存
-        this.saveToStorage();
-    }
-
-    loadFromStorage() {
-        // イベントデータを読み込み
-        const savedEvents = localStorage.getItem('timelineEvents');
-        if (savedEvents) {
-            this.events = JSON.parse(savedEvents);
-        }
-
-        // 人物データを読み込み
-        const savedPersons = localStorage.getItem('timelinePersons');
-        if (savedPersons) {
-            this.persons = JSON.parse(savedPersons);
-        } else {
-            // 初期データ
-            this.persons = [
-                { id: 1, name: '田中太郎', created_at: new Date().toISOString() },
-                { id: 2, name: '佐藤花子', created_at: new Date().toISOString() },
-                { id: 3, name: '山田次郎', created_at: new Date().toISOString() },
-                { id: 4, name: '鈴木美香', created_at: new Date().toISOString() }
-            ];
-        }
-
-        // 場所データを読み込み
-        const savedLocations = localStorage.getItem('timelineLocations');
-        if (savedLocations) {
-            this.locations = JSON.parse(savedLocations);
-        } else {
-            // 初期データ
-            this.locations = [
-                { id: 1, name: 'リビング', created_at: new Date().toISOString() },
-                { id: 2, name: '書斎', created_at: new Date().toISOString() },
-                { id: 3, name: '台所', created_at: new Date().toISOString() },
-                { id: 4, name: '玄関', created_at: new Date().toISOString() },
-                { id: 5, name: '2階', created_at: new Date().toISOString() },
-                { id: 6, name: '庭', created_at: new Date().toISOString() }
-            ];
-        }
-    }
-
-    saveToStorage() {
-        localStorage.setItem('timelineEvents', JSON.stringify(this.events));
-        localStorage.setItem('timelinePersons', JSON.stringify(this.persons));
-        localStorage.setItem('timelineLocations', JSON.stringify(this.locations));
     }
 
     updatePersonSelects() {
@@ -189,7 +164,7 @@ class TimelineAnalyzer {
             const currentValue = select.value;
             select.innerHTML = '<option value="">選択してください</option>';
             
-            this.persons.sort((a, b) => a.name.localeCompare(b.name)).forEach(person => {
+            this.persons.forEach(person => {
                 const option = document.createElement('option');
                 option.value = person.name;
                 option.textContent = person.name;
@@ -209,7 +184,7 @@ class TimelineAnalyzer {
             const currentValue = select.value;
             select.innerHTML = '<option value="">選択してください</option>';
             
-            this.locations.sort((a, b) => a.name.localeCompare(b.name)).forEach(location => {
+            this.locations.forEach(location => {
                 const option = document.createElement('option');
                 option.value = location.name;
                 option.textContent = location.name;
@@ -222,43 +197,40 @@ class TimelineAnalyzer {
         });
     }
 
-    addEvent() {
+    async addEvent() {
         const form = document.getElementById('eventForm');
         const formData = new FormData(form);
         
-        const event = {
-            id: Date.now(),
+        const eventData = {
             time: formData.get('time'),
             person: formData.get('person'),
             location: formData.get('location'),
-            action: formData.get('action'),
-            created_at: new Date().toISOString()
+            action: formData.get('action')
         };
 
-        // 新しい人物・場所があれば自動追加
-        if (event.person && !this.persons.some(p => p.name === event.person)) {
-            this.persons.push({
-                id: Date.now() + 1,
-                name: event.person,
-                created_at: new Date().toISOString()
+        try {
+            const response = await fetch(`${this.apiUrl}/events`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(eventData),
             });
-            this.updatePersonSelects();
-        }
 
-        if (event.location && !this.locations.some(l => l.name === event.location)) {
-            this.locations.push({
-                id: Date.now() + 2,
-                name: event.location,
-                created_at: new Date().toISOString()
-            });
-            this.updateLocationSelects();
+            if (response.ok) {
+                const newEvent = await response.json();
+                await this.loadInitialData();
+                this.updateTable();
+                this.updateLocationFilter();
+                form.reset();
+            } else {
+                const error = await response.json();
+                alert(`エラー: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('イベント追加エラー:', error);
+            alert('サーバーに接続できません');
         }
-
-        this.events.push(event);
-        this.saveToStorage();
-        this.updateTable();
-        this.updateLocationFilter();
-        form.reset();
     }
 
     updateLocationFilter() {
@@ -414,62 +386,86 @@ class TimelineAnalyzer {
         this.editingEventId = null;
     }
 
-    updateEvent() {
+    async updateEvent() {
         if (!this.editingEventId) return;
         
         const formData = new FormData(document.getElementById('editForm'));
-        const eventIndex = this.events.findIndex(event => event.id === this.editingEventId);
-        
-        if (eventIndex !== -1) {
-            const updatedEvent = {
-                ...this.events[eventIndex],
-                time: formData.get('time'),
-                person: formData.get('person'),
-                location: formData.get('location'),
-                action: formData.get('action')
-            };
+        const eventData = {
+            time: formData.get('time'),
+            person: formData.get('person'),
+            location: formData.get('location'),
+            action: formData.get('action')
+        };
 
-            // 新しい人物・場所があれば自動追加
-            if (updatedEvent.person && !this.persons.some(p => p.name === updatedEvent.person)) {
-                this.persons.push({
-                    id: Date.now() + 1,
-                    name: updatedEvent.person,
-                    created_at: new Date().toISOString()
-                });
-                this.updatePersonSelects();
-            }
+        try {
+            const response = await fetch(`${this.apiUrl}/events/${this.editingEventId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(eventData),
+            });
 
-            if (updatedEvent.location && !this.locations.some(l => l.name === updatedEvent.location)) {
-                this.locations.push({
-                    id: Date.now() + 2,
-                    name: updatedEvent.location,
-                    created_at: new Date().toISOString()
-                });
-                this.updateLocationSelects();
-            }
-            
-            this.events[eventIndex] = updatedEvent;
-            this.saveToStorage();
-            this.updateTable();
-            this.updateLocationFilter();
-            this.closeModal();
-        }
-    }
-
-    deleteEvent() {
-        if (!this.editingEventId) return;
-        
-        if (confirm('このデータを削除しますか？')) {
-            const eventIndex = this.events.findIndex(event => event.id === this.editingEventId);
-            
-            if (eventIndex !== -1) {
-                this.events.splice(eventIndex, 1);
-                this.saveToStorage();
+            if (response.ok) {
+                await this.loadInitialData();
                 this.updateTable();
                 this.updateLocationFilter();
                 this.closeModal();
+            } else {
+                const error = await response.json();
+                alert(`エラー: ${error.error}`);
+            }
+        } catch (error) {
+            console.error('イベント更新エラー:', error);
+            alert('サーバーに接続できません');
+        }
+    }
+
+    async deleteEvent() {
+        if (!this.editingEventId) return;
+        
+        if (confirm('このデータを削除しますか？')) {
+            try {
+                const response = await fetch(`${this.apiUrl}/events/${this.editingEventId}`, {
+                    method: 'DELETE',
+                });
+
+                if (response.ok) {
+                    await this.loadInitialData();
+                    this.updateTable();
+                    this.updateLocationFilter();
+                    this.closeModal();
+                } else {
+                    const error = await response.json();
+                    alert(`エラー: ${error.error}`);
+                }
+            } catch (error) {
+                console.error('イベント削除エラー:', error);
+                alert('サーバーに接続できません');
             }
         }
+    }
+
+    // フォールバック用のローカルストレージ機能
+    loadFromStorage() {
+        const savedEvents = localStorage.getItem('timelineEvents');
+        if (savedEvents) {
+            this.events = JSON.parse(savedEvents);
+        }
+        
+        // ローカルストレージからpersonsとlocationsを抽出
+        const persons = new Set();
+        const locations = new Set();
+        this.events.forEach(event => {
+            if (event.person) persons.add(event.person);
+            if (event.location) locations.add(event.location);
+        });
+        
+        this.persons = Array.from(persons).map(name => ({ name }));
+        this.locations = Array.from(locations).map(name => ({ name }));
+        
+        this.updatePersonSelects();
+        this.updateLocationSelects();
     }
 }
 

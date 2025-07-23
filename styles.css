@@ -293,6 +293,43 @@ tr:hover {
     background-color: #2980b9;
 }
 
+.select-wrapper {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.select-wrapper select {
+    flex: 1;
+}
+
+.select-wrapper input[type="text"] {
+    flex: 1;
+}
+
+.add-btn {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.add-btn:hover {
+    background-color: #219a52;
+}
+
+.add-btn.cancel {
+    background-color: #e74c3c;
+}
+
+.add-btn.cancel:hover {
+    background-color: #c0392b;
+}
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
