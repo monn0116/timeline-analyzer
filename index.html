@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>時系列推理整理アプリ</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>時系列推理整理アプリ</h1>
+        </header>
+
+        <main>
+            <section class="input-section">
+                <h2>情報入力</h2>
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label for="time">時間:</label>
+                        <input type="time" id="time" name="time" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="person">人物名:</label>
+                        <input type="text" id="person" name="person" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="location">場所:</label>
+                        <input type="text" id="location" name="location" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="action">行動:</label>
+                        <textarea id="action" name="action" rows="3" required></textarea>
+                    </div>
+                    
+                    <button type="submit">追加</button>
+                </form>
+            </section>
+
+            <section class="filter-section">
+                <h2>絞り込み</h2>
+                <div class="filter-group">
+                    <label for="locationFilter">場所で絞り込み:</label>
+                    <select id="locationFilter">
+                        <option value="">すべての場所</option>
+                    </select>
+                </div>
+            </section>
+
+            <section class="timeline-section">
+                <h2>時系列表</h2>
+                <div class="table-container">
+                    <table id="timelineTable">
+                        <thead>
+                            <tr id="tableHeader">
+                                <th>時間</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
