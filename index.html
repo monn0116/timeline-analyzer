@@ -14,76 +14,79 @@
 
         <nav class="main-nav">
             <div class="main-tabs">
-                <button class="main-tab-btn active" data-main-tab="timeline">時系列入力</button>
+                <button class="main-tab-btn active" data-main-tab="input">情報入力</button>
+                <button class="main-tab-btn" data-main-tab="timeline">時系列表</button>
                 <button class="main-tab-btn" data-main-tab="management">データ管理</button>
             </div>
         </nav>
 
         <main>
-            <div class="main-tab-content active" id="timeline-content">
-            <section class="input-section">
-                <h2>情報入力</h2>
-                <form id="eventForm">
-                    <div class="form-group">
-                        <label for="time">時間:</label>
-                        <input type="time" id="time" name="time" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="person">人物名:</label>
-                        <div class="select-wrapper">
-                            <select id="person" name="person" required>
-                                <option value="">選択してください</option>
-                            </select>
-                            <input type="text" id="personInput" placeholder="新しい人物名を入力" style="display:none;">
-                            <button type="button" id="addPersonBtn" class="add-btn">新規追加</button>
+            <div class="main-tab-content active" id="input-content">
+                <section class="input-section">
+                    <h2>情報入力</h2>
+                    <form id="eventForm">
+                        <div class="form-group">
+                            <label for="time">時間:</label>
+                            <input type="time" id="time" name="time" required>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="location">場所:</label>
-                        <div class="select-wrapper">
-                            <select id="location" name="location" required>
-                                <option value="">選択してください</option>
-                            </select>
-                            <input type="text" id="locationInput" placeholder="新しい場所名を入力" style="display:none;">
-                            <button type="button" id="addLocationBtn" class="add-btn">新規追加</button>
+                        
+                        <div class="form-group">
+                            <label for="person">人物名:</label>
+                            <div class="select-wrapper">
+                                <select id="person" name="person" required>
+                                    <option value="">選択してください</option>
+                                </select>
+                                <input type="text" id="personInput" placeholder="新しい人物名を入力" style="display:none;">
+                                <button type="button" id="addPersonBtn" class="add-btn">新規追加</button>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="action">行動:</label>
-                        <textarea id="action" name="action" rows="3" required></textarea>
-                    </div>
-                    
-                    <button type="submit">追加</button>
-                </form>
-            </section>
+                        
+                        <div class="form-group">
+                            <label for="location">場所:</label>
+                            <div class="select-wrapper">
+                                <select id="location" name="location" required>
+                                    <option value="">選択してください</option>
+                                </select>
+                                <input type="text" id="locationInput" placeholder="新しい場所名を入力" style="display:none;">
+                                <button type="button" id="addLocationBtn" class="add-btn">新規追加</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="action">行動:</label>
+                            <textarea id="action" name="action" rows="3" required></textarea>
+                        </div>
+                        
+                        <button type="submit">追加</button>
+                    </form>
+                </section>
+            </div>
 
-            <section class="filter-section">
-                <h2>絞り込み</h2>
-                <div class="filter-group">
-                    <label for="locationFilter">場所で絞り込み:</label>
-                    <select id="locationFilter">
-                        <option value="">すべての場所</option>
-                    </select>
-                </div>
-            </section>
+            <div class="main-tab-content" id="timeline-content">
+                <section class="filter-section">
+                    <h2>絞り込み</h2>
+                    <div class="filter-group">
+                        <label for="locationFilter">場所で絞り込み:</label>
+                        <select id="locationFilter">
+                            <option value="">すべての場所</option>
+                        </select>
+                    </div>
+                </section>
 
-            <section class="timeline-section">
-                <h2>時系列表</h2>
-                <div class="table-container">
-                    <table id="timelineTable">
-                        <thead>
-                            <tr id="tableHeader">
-                                <th>時間</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                <section class="timeline-section">
+                    <h2>時系列表</h2>
+                    <div class="table-container">
+                        <table id="timelineTable">
+                            <thead>
+                                <tr id="tableHeader">
+                                    <th>時間</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
             </div>
 
             <div class="main-tab-content" id="management-content">

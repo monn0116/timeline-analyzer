@@ -281,6 +281,11 @@ class TimelineAnalyzer {
         this.updateTable();
         this.updateLocationFilter();
         form.reset();
+        
+        // 入力後に時系列表タブに自動切り替え
+        setTimeout(() => {
+            this.switchToTab('timeline');
+        }, 500);
     }
 
     updateLocationFilter() {
@@ -510,12 +515,41 @@ class TimelineAnalyzer {
                 btn.classList.add('active');
                 document.getElementById(`${targetTab}-content`).classList.add('active');
 
-                // データ管理タブに切り替わった時にリストを更新
+                // タブ切り替え時の特別な処理
                 if (targetTab === 'management') {
                     this.updateManagementLists();
+                } else if (targetTab === 'timeline') {
+                    this.updateTable();
+                    this.updateLocationFilter();
                 }
             });
         });
+    }
+
+    switchToTab(tabName) {
+        const mainTabBtns = document.querySelectorAll('.main-tab-btn');
+        const mainTabContents = document.querySelectorAll('.main-tab-content');
+
+        // アクティブなメインタブを切り替え
+        mainTabBtns.forEach(b => b.classList.remove('active'));
+        mainTabContents.forEach(c => c.classList.remove('active'));
+
+        // 新しいタブをアクティブに
+        const targetBtn = document.querySelector(`[data-main-tab="${tabName}"]`);
+        const targetContent = document.getElementById(`${tabName}-content`);
+        
+        if (targetBtn && targetContent) {
+            targetBtn.classList.add('active');
+            targetContent.classList.add('active');
+
+            // タブ切り替え時の特別な処理
+            if (tabName === 'management') {
+                this.updateManagementLists();
+            } else if (tabName === 'timeline') {
+                this.updateTable();
+                this.updateLocationFilter();
+            }
+        }
     }
 
     // 管理機能のメソッド
