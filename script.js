@@ -598,7 +598,14 @@ class TimelineAnalyzer {
     }
 
     bulkAddItems(type) {
-        const textareaId = `bulk${type.charAt(0).toUpperCase() + type.slice(0, -1)}s`;
+        let textareaId;
+        if (type === 'persons') {
+            textareaId = 'bulkPersons';
+        } else if (type === 'locations') {
+            textareaId = 'bulkLocations';
+        } else if (type === 'times') {
+            textareaId = 'bulkTimes';
+        }
         const textarea = document.getElementById(textareaId);
         const inputText = textarea.value.trim();
 
